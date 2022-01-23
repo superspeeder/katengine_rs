@@ -9,6 +9,7 @@ pub trait VKContext {
 }
 
 
-pub trait PlatformedAppContext {
-    fn new(app_context: Rc<AppContext>) -> Self;
+
+pub trait PlatformedAppContext<T: App> {
+    fn new(app_context: Rc<AppContext<T>>) -> Self;
 }

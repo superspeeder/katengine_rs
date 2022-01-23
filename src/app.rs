@@ -1,11 +1,13 @@
 use std::cell::RefCell;
-use std::ops::{Deref, DerefMut};
 use std::rc::Rc;
+
 use winit::dpi::LogicalSize;
 use winit::event::{Event, WindowEvent};
+use winit::event_loop::ControlFlow;
 use winit::event_loop::ControlFlow::{Exit, Poll};
 use winit::event_loop::EventLoop;
 use winit::monitor::MonitorHandle;
+use winit::platform::run_return::EventLoopExtRunReturn;
 use winit::window::{Fullscreen, Icon, Window, WindowBuilder};
 
 pub enum FullscreenType {
@@ -29,9 +31,9 @@ pub trait App {
     fn draw(&mut self);
 }
 
-pub struct AppContext {
+pub struct AppContext<T: App> {
     window: Window,
-    event_loop: EventLoop<()>,
+    app: RefCell<T>,
 }
 
 impl Default for WindowConfig {
@@ -52,10 +54,8 @@ impl Default for WindowConfig {
 }
 
 
-impl AppContext {
-    pub fn new(cfg: WindowConfig) -> AppContext {
-        let evtl = winit::event_loop::EventLoop::new();
-
+impl<T: App> AppContext<T> {
+    pub fn new(cfg: WindowConfig, evtl: &mut EventLoop<()>, app_: RefCell<T>) -> AppContext<T> {
         let mut fullscr: Option<Fullscreen> = None;
         if cfg.fullscreen.is_some() {
             let ft = cfg.fullscreen.unwrap();
@@ -100,31 +100,29 @@ impl AppContext {
                 .with_window_icon(cfg.icon)
                 .with_fullscreen(fullscr)
                 .build(&evtl).unwrap(),
-            event_loop: evtl,
+            app: app_,
         }
 
     }
 
-    pub fn run<T: App>(&mut self, app: T) {
-        let eloop = &mut self.event_loop;
+    // pub fn run<T: App>(&mut self, eloop: &mut EventLoop<()>) {
 
-        eloop.run(move |event, _, control_flow| {
-            *control_flow = Poll;
+    // }
 
-            match event {
-                Event::WindowEvent {
-                    event: WindowEvent::CloseRequested,
-                    ..
-                } => {
-                    println!("Closing Window!");
-                    *control_flow = Exit;
-                },
-                Event::MainEventsCleared => {
-                    app_.draw();
-                },
-                _ => ()
-            }
-        });
+    pub fn on_event(&mut self, event: &Event<()>, control_flow: &mut ControlFlow) {
+        match event {
+            Event::WindowEvent {
+                event: WindowEvent::CloseRequested,
+                ..
+            } => {
+                println!("Closing Window!");
+                *control_flow = Exit;
+            },
+            Event::MainEventsCleared => {
+                self.app.borrow_mut().draw();
+            },
+            _ => ()
+        }
     }
 }
 
