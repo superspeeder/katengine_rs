@@ -1,6 +1,7 @@
 mod platform;
 mod context;
 mod app;
+mod swapchain;
 
 extern crate winit;
 extern crate ash;
