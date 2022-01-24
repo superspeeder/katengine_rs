@@ -106,10 +106,6 @@ impl<T: App> AppContext<T> {
 
     }
 
-    // pub fn run<T: App>(&mut self, eloop: &mut EventLoop<()>) {
-
-    // }
-
     pub fn on_event(&mut self, event: &Event<()>, control_flow: &mut ControlFlow) {
         match event {
             Event::WindowEvent {
@@ -134,7 +130,7 @@ impl<T: App> AppContext<T> {
 #[macro_export]
 macro_rules! run_app {
     ($app_ctx:ident,$event_loop_:ident) => {
-        $event_loop_.run(move |event, _, control_flow| {
+        $event_loop_.run_return(|event, _, control_flow| {
             *control_flow = Poll;
     
             $app_ctx.borrow_mut().on_event(&event, control_flow);

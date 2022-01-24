@@ -36,6 +36,8 @@ impl PlatformedVKContext for VKContext {
             ash::extensions::khr::Win32Surface::new(entry.deref(), &inst)
                 .create_win32_surface(&create_info, None)
         }.expect("Failed to create surface"));
+
+        println!("Created window surface!");
     }
 
 

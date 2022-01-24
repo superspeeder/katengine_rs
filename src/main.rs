@@ -9,6 +9,7 @@ extern crate windows;
 use std::cell::RefCell;
 use winit::event_loop::ControlFlow::Poll;
 use winit::event_loop::EventLoop;
+use winit::platform::run_return::EventLoopExtRunReturn;
 use crate::app::{App, AppContext, WindowConfig};
 use context::{VKContext, Version, PlatformedVKContext};
 
@@ -38,8 +39,4 @@ fn main() {
     vk_context.get_mut().create_surface(app_context.get_mut().get_window());
 
     run_app!(app_context,event_loop);
-
-
-
-
 }

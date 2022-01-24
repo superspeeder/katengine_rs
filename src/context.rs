@@ -8,6 +8,7 @@ use ash::vk::{SurfaceKHR, PhysicalDevice};
 use winit::window::Window;
 use crate::platform::internal::platform_required_instance_extensions;
 use std::ops::Deref;
+use std::os::raw::c_char;
 
 // Platform agnostic context traits & structs
 
@@ -136,14 +137,20 @@ impl VKContext {
         self.gpu = Some(gpus[0]);
 
         let mut props = unsafe { self.instance.get_physical_device_properties(self.gpu.unwrap()) };
-        let name = unsafe { CString::from_raw(props.device_name.as_mut_ptr()) };
-        println!("Selected GPU 0: {}", name.into_string().unwrap());
+        let name = read_c_string_fixed(props.device_name);
+
+        println!("Selected GPU 0: {}", name);
     }
 
     pub fn select_gpu(&mut self, id: usize) {
         let gpus = unsafe { self.instance.enumerate_physical_devices() }.expect("Couldn't load physical devices!");
 
         self.gpu = Some(gpus[if id >= gpus.len() { 0 } else { id }]);
+
+        let mut props = unsafe { self.instance.get_physical_device_properties(self.gpu.unwrap()) };
+        let name = read_c_string_fixed(props.device_name);
+
+        println!("Selected GPU 0: {}", name);
     }
 
     pub fn get_surface(&mut self) -> Option<SurfaceKHR> {
@@ -159,12 +166,27 @@ impl VKContext {
     }
 }
 
+fn read_c_string_fixed<const S: usize>(p0: [c_char; S]) -> String {
+    let mut str_data = Vec::<u8>::new();
+    p0.iter().for_each(|c| {
+        if *c != 0 {
+            str_data.push(*c as u8);
+        }
+    });
+    str_data.push(0);
+
+    let name_cs = CString::from_vec_with_nul(str_data).unwrap();
+    name_cs.into_string().unwrap()
+}
+
 impl Drop for VKContext {
     fn drop(&mut self) {
         if self.surface_api.is_some() && self.surface.is_some() {
             unsafe { self.surface_api.as_ref().unwrap().destroy_surface(self.surface.unwrap(), None); }
+            println!("Destroyed Window Surface!");
         }
 
         unsafe { self.instance.destroy_instance(None); }
+        println!("Destroyed Instance!");
     }
 }
