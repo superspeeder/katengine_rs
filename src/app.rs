@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::borrow::BorrowMut;
 
 use winit::dpi::LogicalSize;
 use winit::event::{Event, WindowEvent};
@@ -124,5 +125,19 @@ impl<T: App> AppContext<T> {
             _ => ()
         }
     }
+
+    pub fn get_window(&mut self) -> &mut Window {
+        &mut self.window
+    }
 }
 
+#[macro_export]
+macro_rules! run_app {
+    ($app_ctx:ident,$event_loop_:ident) => {
+        $event_loop_.run(move |event, _, control_flow| {
+            *control_flow = Poll;
+    
+            $app_ctx.borrow_mut().on_event(&event, control_flow);
+        });
+    }
+}

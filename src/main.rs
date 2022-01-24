@@ -3,14 +3,14 @@ mod context;
 mod app;
 
 extern crate winit;
+extern crate ash;
+extern crate windows;
 
 use std::cell::RefCell;
-use std::rc::Rc;
-use winit::dpi::LogicalSize;
-use winit::event::{Event, WindowEvent};
-use winit::event_loop::ControlFlow::{Exit, Poll};
+use winit::event_loop::ControlFlow::Poll;
 use winit::event_loop::EventLoop;
 use crate::app::{App, AppContext, WindowConfig};
+use context::{VKContext, Version, PlatformedVKContext};
 
 struct TestApp {
 }
@@ -32,33 +32,13 @@ fn main() {
     let mut event_loop = EventLoop::new();
 
     let mut app_context = RefCell::new(AppContext::new(window_config, &mut event_loop, app));
+    let mut vk_context = RefCell::new(VKContext::new("TestApp".to_string(), Version::new(0,1,0), vec![], vec![]));
 
-    event_loop.run(move |event, _, control_flow| {
-        *control_flow = Poll;
+    vk_context.get_mut().select_default_gpu();
+    vk_context.get_mut().create_surface(app_context.get_mut().get_window());
 
-        // match event {
-        //     Event::WindowEvent {
-        //         event: WindowEvent::CloseRequested,
-        //         ..
-        //     } => {
-        //         println!("Closing Window!");
-        //         *control_flow = Exit;
-        //     },
-        //     Event::MainEventsCleared => {
-        //         app.draw();
-        //     },
-        //     _ => ()
-        // }
+    run_app!(app_context,event_loop);
 
-        app_context.borrow_mut().on_event(&event, control_flow);
-    });
-
-    // let event_loop = winit::event_loop::EventLoop::new();
-    //
-    // let window = winit::window::WindowBuilder::new()
-    //     .with_inner_size(LogicalSize::new(800, 800))
-    //     .build(&event_loop).unwrap();
-    //
 
 
 
