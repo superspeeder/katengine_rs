@@ -1,0 +1,21 @@
+[package]
+name = "katengine_rs"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+anyhow = "1.0.79"
+ash = "0.37.3"
+ash-window = "0.12.0"
+bytemuck = { version = "1.14.0", features = ["derive"] }
+cgmath = { version = "0.18.0", features = ["mint", "rand", "serde", "swizzle"] }
+log = "0.4.20"
+mint = { version = "0.5.9", features = ["serde"] }
+pretty_env_logger = "0.5.0"
+rand = { version = "0.8.5", features = ["serde", "log"] }
+serde = { version = "1.0.195", features = ["derive", "rc", "alloc"] }
+thiserror = "1.0.56"
+winit = { version = "0.29.10", features = ["mint", "serde", "rwh_05", "ahash", "bytemuck", "memmap2", "percent-encoding", "sctk", "sctk-adwaita", "wayland", "wayland-backend", "wayland-client", "wayland-csd-adwaita-notitle", "wayland-dlopen", "wayland-protocols", "wayland-protocols-plasma", "x11", "x11-dl", "x11rb"], default-features = false }
+
